@@ -1,11 +1,18 @@
-## Computational Verification Report
+ --- REPORTE TÉCNICO DE ALTA VELOCIDAD ---
+    Núcleos de CPU utilizados: 8
+    Total de números analizados: 500000
+    Tiempo transcurrido: 36.90 segundos
+    Velocidad: 13550 números/seg
+    
+    RESULTADOS:
+    - No se encontraron ciclos ajenos al 4-2-1.
+    - No se detectaron divergencias infinitas.
+    
+    RÉCORD DE ESTA SESIÓN:
+    - Semilla: 590464975546399692268350901204
+    - Pasos hasta llegar a 1: 1570
+    
 
-**Numbers tested:** 3000  
-**Divergent trajectories:** None detected  
-**Non-trivial cycles:** None detected (only 4–2–1)  
-
-**Record stopping time:** 372  
-**Record seed:** 7,237,231  
 
 **Conclusion:**  
 The results are consistent with known Collatz behaviour, but they do **not** constitute a proof.
