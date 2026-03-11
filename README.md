@@ -1,33 +1,25 @@
-"Theoretical vs Empirical Correlation"
-# collatz-lyapunov-stability
-A 4-level research engine to verify 3n+1 stability through logarithmic energy decay and mass-testing.
-# 🏛️ Collatz Stability Analysis via Lyapunov Exponents
+Collatz Q-Proof Engine: Stability & Anomaly Test
+Este repositorio contiene un motor de análisis avanzado diseñado para validar la Estabilidad
+Asintotica Global de la Conjetura de Collatz (3n + 1). A diferencia de las simulaciones
+iterativas tradicionales, este proyecto utiliza Teoria de Estabilidad de Lyapunov y Calculo
+Tensorial para demostrar la inviabilidad estadistica de trayectorias divergentes.
 
-### A Dynamical Systems Approach to the 3n+1 Conjecture
+Marco Teorico
 
-Este motor de análisis matemático proporciona una vía de validación para la **Conjetura de Collatz**, desplazando el enfoque de la simple iteración numérica hacia la **Dinámica de Contracción Logarítmica**.
+La investigacion se centra en la transformacion de Collatz como un sistema dinamico
+disipativo. El núcleo del argumento se basa en la deriva logaritmica (Logarithmie Drift):
 
-## 🔬 Metodología de Investigación
+E[ln(zn+1) - In(z.)] =In(1.5) +In(0.5) =- 0.1438
+Dado que el valor esperado de crecimiento es negativo (E < 0), el sistema actúa como un
+mapeo de contracción, forzando a todas las semillas hacia el atractor de energia minima: el
+ciclo {4,2,1}-
 
-A diferencia de los métodos de fuerza bruta tradicionales, este motor implementa un análisis de **Estabilidad de Lyapunov**. El núcleo de la investigación se basa en el cálculo del valor esperado del crecimiento logarítmico:
-
-$$E[\ln(n_{k+1}) - \ln(n_k)]$$
-
-Un resultado donde $E < 0$ (exponente negativo) constituye una evidencia empírica de que el sistema actúa como un **sumidero entrópico**, forzando a cualquier número entero a colapsar eventualmente en el atractor $\{4, 2, 1\}$.
-
-## 🚀 Características del Motor
-
-* **Nivel 1 & 2: Mapeo de Órbita:** Seguimiento completo de la trayectoria y detección de picos de energía.
-* **Nivel 3: Dinámica de Bits:** Análisis de cómo la complejidad binaria se reduce sistemáticamente.
-* **Nivel 4: Prueba Estocástica Global:** Ejecución de pruebas masivas aleatorias (N=100) para calcular la media de convergencia universal ($\mu$).
-* **Generación de Reportes:** Exportación automatizada de resultados en formato PDF científico mediante el motor PyMuPDF.
-
-## 📊 Resultados de Referencia (Nivel 4)
-
-En pruebas de estrés realizadas con el motor, se han obtenido los siguientes indicadores de estabilidad:
-- **Media Global ($\mu$):** $\approx -0.129$
-- **Tasa de Convergencia:** 100% (Muestreo estocástico hasta $10^6$)
-- **Estado del Sistema:** Asintóticamente estable.
-
-
-   git clone [https://github.com/TU_USUARIO/Collatz-Lyapunov-Engine.git](https://github.com/TU_USUARIO/Collatz-Lyapunov-Engine.git)
++ Caracteristicas Principales
+. Tensor-Flow Stress Test: Uso de PyTorch para simular 50,000 trayectorias paralelas,
+buscando "anomalias de crecimiento" en campos estocásticos.
+. Analisis de Anomalia Maxima: Algoritmo de detección de valores extremos que verifica
+si incluso el camino con "más suerte" mantiene una deriva negativa.
+. Generador de Tesis en PDF: Exportación automática de reportes cientificos con rigor
+academico utilizando PyMuPDF
+. Interfaz Gradio: Entorno visual para ejecutar pruebas de estrés y visualizar exponentes
+de Lyapunov en tiempo real.
