@@ -1,57 +1,165 @@
-import torch
-from diffusers import StableDiffusionPipeline
-import huggingface_hub
-import sys
+import gradio as gr
+import cv2
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# --- CONFIGURACIÓN DE NÚCLEO ---
-sys.modules['peft'] = None 
-if not hasattr(huggingface_hub, 'cached_download'):
-    huggingface_hub.cached_download = huggingface_hub.hf_hub_download
+MAX_ITER = 10000
+CACHE = {1: 0}
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-dtype = torch.float16 if device == "cuda" else torch.float32
+def collatz_next(n):
+    if n % 2 == 0:
+        return n // 2
+    return 3*n + 1
 
-# Cargamos el modelo como "Sensor de Convergencia"
-pipe = StableDiffusionPipeline.from_pretrained(
-    "runwayml/stable-diffusion-v1-5", torch_dtype=dtype, safety_checker=None
-).to(device)
 
-def demostrar_collatz(n_inicial):
-    n = n_inicial
-    pasos = 0
-    print(f"--- INICIO DE DEMOSTRACIÓN PARA n = {n_inicial} ---")
-    print(f"Hipótesis: ∀ n ∈ ℤ+, ∃ k t.q. f^k(n) = 1")
-    
-    while n > 1:
-        # Aquí integramos la fórmula matemática real en cada paso
-        if n % 2 == 0:
-            proximo_n = n // 2
-            print(f"Paso {pasos+1}: n={n} es PAR → f(n) = n/2 = {proximo_n}")
-            n = proximo_n
-        else:
-            proximo_n = 3 * n + 1
-            print(f"Paso {pasos+1}: n={n} es IMPAR → f(n) = 3n+1 = {proximo_n}")
-            n = proximo_n
-        pasos += 1
-        
-        # Cada vez que llegamos a una potencia de 2, la IA confirma la 'caída libre'
-        if (n & (n - 1) == 0) and n > 0:
-            print(f">>> PUNTO DE CONVERGENCIA DETECTADO: {n} es potencia de 2.")
+def analyze_number(n):
+    visited = set()
+    sequence = []
+
+    steps = 0
+    max_value = n
+
+    while n != 1 and steps < MAX_ITER:
+
+        if n in visited:
+            return {
+                "cycle": True,
+                "sequence": sequence
+            }
+
+        visited.add(n)
+        sequence.append(n)
+
+        n = collatz_next(n)
+
+        max_value = max(max_value, n)
+        steps += 1
+
+    return {
+        "cycle": False,
+        "steps": steps,
+        "max": max_value,
+        "sequence": sequence
+    }
+
+
+def analisis_instituto_matematico(video_path):
+
+    cap = cv2.VideoCapture(video_path)
+
+    record_steps = 0
+    record_seed = 0
+    record_sequence = []
+
+    cycle_found = False
+    cycle_seed = None
+
+    steps_distribution = []
+
+    frame_count = 0
+
+    while cap.isOpened() and frame_count < 100:
+
+        ret, frame = cap.read()
+        if not ret:
             break
 
-    # GENERACIÓN DE LA FIRMA VISUAL FINAL (LA PRUEBA)
-    print("\nGenerando 'Firma Visual del Atractor 1' para cerrar la prueba...")
-    gen = torch.Generator(device=device).manual_seed(1)
-    # El prompt ahora describe la fórmula final
-    prompt = f"Mathematical proof constant, limit of f(n) as n approaches infinity is 1, grid of stability, seed 1"
-    
-    img = pipe(prompt=prompt, num_inference_steps=20, guidance_scale=0, generator=gen).images[0]
-    img.save("demostracion_final_collatz.png")
-    
-    print("-" * 50)
-    print(f"CONCLUSIÓN: n={n_inicial} siempre llegará a 1 porque ha entrado en la órbita del atractor.")
-    print(f"Fórmula de la trayectoria: f^{pasos}({n_inicial}) = 1")
-    print("-" * 50)
+        for _ in range(30):
 
-# Ejecutamos para un número que elijas
-demostrar_collatz(27)
+            y = np.random.randint(0, frame.shape[0])
+            x = np.random.randint(0, frame.shape[1])
+
+            r,g,b = frame[y,x]
+
+            n = int(r)*65536 + int(g)*256 + int(b) + 1
+
+            result = analyze_number(n)
+
+            if result["cycle"]:
+                cycle_found = True
+                cycle_seed = n
+                break
+
+            steps_distribution.append(result["steps"])
+
+            if result["steps"] > record_steps:
+
+                record_steps = result["steps"]
+                record_seed = n
+                record_sequence = result["sequence"]
+
+        if cycle_found:
+            break
+
+        frame_count += 1
+
+    cap.release()
+
+    plt.style.use("seaborn-v0_8-whitegrid")
+
+    fig,(ax1,ax2)=plt.subplots(2,1,figsize=(12,10))
+
+    if record_sequence:
+        ax1.plot(record_sequence)
+        ax1.set_yscale("log")
+        ax1.set_title(f"Collatz trajectory (seed={record_seed})")
+        ax1.set_ylabel("Value (log scale)")
+
+    ax2.hist(steps_distribution,bins=40,color="green",alpha=0.7)
+    ax2.set_title("Stopping time distribution")
+    ax2.set_xlabel("Iterations")
+    ax2.set_ylabel("Frequency")
+
+    plt.tight_layout()
+
+    plot_path="collatz_analysis.png"
+    plt.savefig(plot_path)
+
+    df=pd.DataFrame({
+        "steps":steps_distribution
+    })
+
+    csv_path="collatz_data.csv"
+    df.to_csv(csv_path,index=False)
+
+    if cycle_found:
+        conclusion=f"""
+POTENTIAL COUNTEREXAMPLE FOUND
+
+Seed: {cycle_seed}
+
+A non-trivial cycle may exist.
+Further mathematical verification required.
+"""
+    else:
+        conclusion=f"""
+COMPUTATIONAL VERIFICATION REPORT
+
+Numbers tested: {len(steps_distribution)}
+
+No divergent trajectories detected.
+No cycles different from 4-2-1 detected.
+
+Record stopping time: {record_steps}
+Record seed: {record_seed}
+
+Conclusion:
+Evidence supports the Collatz behaviour but does NOT constitute a proof.
+"""
+
+    return conclusion,csv_path,plot_path
+
+
+demo=gr.Interface(
+    fn=analisis_instituto_matematico,
+    inputs=gr.Video(),
+    outputs=[
+        gr.Textbox(label="Mathematical Report"),
+        gr.File(label="Dataset"),
+        gr.Image(label="Analysis Graphs")
+    ],
+    title="Collatz Counterexample Scanner"
+)
+
+demo.launch()
