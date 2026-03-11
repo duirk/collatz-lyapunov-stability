@@ -23,3 +23,10 @@ si incluso el camino con "más suerte" mantiene una deriva negativa.
 academico utilizando PyMuPDF
 . Interfaz Gradio: Entorno visual para ejecutar pruebas de estrés y visualizar exponentes
 de Lyapunov en tiempo real.
+
+git clone https://github.com/tu-usuario/collatz-q-proof.git
+cd collatz-q-proof
+
+pip install torch numpy pymupdf gradio
+
+
