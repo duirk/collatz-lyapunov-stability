@@ -42,3 +42,4 @@ Dataset en CSV
 Gráfica de análisis
 
 Todo ello accesible mediante una interfaz interactiva construida con Gradio.
+“Los píxeles del video actúan como un generador pseudoaleatorio natural, permitiendo explorar el espacio numérico de forma no sesgada.”
