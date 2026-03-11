@@ -70,7 +70,7 @@ def analisis_instituto_matematico(video_path):
             y = np.random.randint(0, frame.shape[0])
             x = np.random.randint(0, frame.shape[1])
 
-            r,g,b = frame[y,x]
+            r, g, b = frame[y, x]
 
             n = int(r)*65536 + int(g)*256 + int(b) + 1
 
@@ -98,7 +98,7 @@ def analisis_instituto_matematico(video_path):
 
     plt.style.use("seaborn-v0_8-whitegrid")
 
-    fig,(ax1,ax2)=plt.subplots(2,1,figsize=(12,10))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
 
     if record_sequence:
         ax1.plot(record_sequence)
@@ -106,25 +106,25 @@ def analisis_instituto_matematico(video_path):
         ax1.set_title(f"Collatz trajectory (seed={record_seed})")
         ax1.set_ylabel("Value (log scale)")
 
-    ax2.hist(steps_distribution,bins=40,color="green",alpha=0.7)
+    ax2.hist(steps_distribution, bins=40, color="green", alpha=0.7)
     ax2.set_title("Stopping time distribution")
     ax2.set_xlabel("Iterations")
     ax2.set_ylabel("Frequency")
 
     plt.tight_layout()
 
-    plot_path="collatz_analysis.png"
+    plot_path = "collatz_analysis.png"
     plt.savefig(plot_path)
 
-    df=pd.DataFrame({
-        "steps":steps_distribution
+    df = pd.DataFrame({
+        "steps": steps_distribution
     })
 
-    csv_path="collatz_data.csv"
-    df.to_csv(csv_path,index=False)
+    csv_path = "collatz_data.csv"
+    df.to_csv(csv_path, index=False)
 
     if cycle_found:
-        conclusion=f"""
+        conclusion = f"""
 POTENTIAL COUNTEREXAMPLE FOUND
 
 Seed: {cycle_seed}
@@ -133,7 +133,7 @@ A non-trivial cycle may exist.
 Further mathematical verification required.
 """
     else:
-        conclusion=f"""
+        conclusion = f"""
 COMPUTATIONAL VERIFICATION REPORT
 
 Numbers tested: {len(steps_distribution)}
@@ -148,10 +148,10 @@ Conclusion:
 Evidence supports the Collatz behaviour but does NOT constitute a proof.
 """
 
-    return conclusion,csv_path,plot_path
+    return conclusion, csv_path, plot_path
 
 
-demo=gr.Interface(
+demo = gr.Interface(
     fn=analisis_instituto_matematico,
     inputs=gr.Video(),
     outputs=[
